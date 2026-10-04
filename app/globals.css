@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fundo: #0b1020;
+  --color-painel: #121a30;
+  --color-painel-2: #18223d;
+  --color-linha: #24304f;
+  --color-texto: #e8ecf6;
+  --color-suave: #8b96b3;
+  --color-ouro: #f5c542;
+  --color-verde: #2fd38a;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #1b2a5a55, transparent 60%),
+    radial-gradient(900px 400px at 110% 0%, #0f5a4a33, transparent 60%),
+    var(--color-fundo);
+  color: var(--color-texto);
+  min-height: 100dvh;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Barra de votos: cresce suavemente a cada atualização */
+.barra {
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Brilho correndo na barra enquanto a apuração está em andamento */
+.barra-viva::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, #ffffff30, transparent);
+  transform: translateX(-100%);
+  animation: brilho 2.4s ease-in-out infinite;
+}
+
+@keyframes brilho {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.ao-vivo {
+  animation: pulso 1.6s ease-in-out infinite;
+}
+
+@keyframes pulso {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Destaque rápido quando os números mudam */
+.flash-a {
+  animation: flash-a 1s ease-out;
+}
+.flash-b {
+  animation: flash-b 1s ease-out;
+}
+
+/* Duas animações idênticas para poder reiniciar a cada atualização */
+@keyframes flash-a {
+  from {
+    background-color: #2fd38a22;
+  }
+}
+@keyframes flash-b {
+  from {
+    background-color: #2fd38a22;
+  }
+}
+
+select {
+  background-image: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra,
+  .barra-viva::after,
+  .ao-vivo,
+  .flash-a,
+  .flash-b {
+    transition: none;
+    animation: none;
+  }
+}
