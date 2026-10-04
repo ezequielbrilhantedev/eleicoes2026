@@ -1,6 +1,6 @@
 // Cores aproximadas das identidades visuais dos partidos, ajustadas para o fundo escuro.
-// Os principais (PT, PL, PSD, NOVO, MDB, UNIÃO) foram escolhidos para não se confundirem
-// entre si; os demais podem se parecer, por isso o mapa também mostra a sigla em texto.
+// Os que mais lideram estados (PT, PL, PSD, NOVO, MDB, UNIÃO, REPUBLICANOS, PP, PSDB, PODE, PSB)
+// foram escolhidos para não se confundirem entre si; os demais podem se parecer, por isso o mapa também mostra a sigla em texto.
 const CORES_PARTIDOS: Record<string, string> = {
   PT: '#e0303f',
   PL: '#3a7bff',
@@ -9,12 +9,12 @@ const CORES_PARTIDOS: Record<string, string> = {
   MDB: '#2fb35a',
   'UNIÃO': '#22b3c7',
   PSB: '#e45ba8',
-  PSDB: '#8ab8ff',
-  REPUBLICANOS: '#5b6cff',
-  PP: '#4fa3d9',
-  PSOL: '#b57bff',
+  PSDB: '#3d5a99',
+  REPUBLICANOS: '#c77dff',
+  PP: '#9fd6ff',
+  PSOL: '#ffb3d9',
   PDT: '#c94b3b',
-  PODE: '#7cc242',
+  PODE: '#5fe08a',
   'MISSÃO': '#d6e23a',
   PCdoB: '#b3262e',
   'PC do B': '#b3262e',
