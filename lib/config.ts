@@ -56,3 +56,14 @@ export function cargosDe(abr: string): CargoId[] {
   if (abr === 'BR') return [1]
   return abr === 'DF' ? [1, 3, 5, 6, 8] : [1, 3, 5, 6, 7]
 }
+
+/** Cargos que têm visão em mapa (um vencedor por estado). */
+export const CARGOS_MAPA: CargoId[] = [1, 3, 5]
+
+export const REGIOES: { nome: string; ufs: string[] }[] = [
+  { nome: 'Norte', ufs: ['AC', 'AP', 'AM', 'PA', 'RO', 'RR', 'TO'] },
+  { nome: 'Nordeste', ufs: ['AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'] },
+  { nome: 'Centro-Oeste', ufs: ['DF', 'GO', 'MT', 'MS'] },
+  { nome: 'Sudeste', ufs: ['ES', 'MG', 'RJ', 'SP'] },
+  { nome: 'Sul', ufs: ['PR', 'RS', 'SC'] },
+]

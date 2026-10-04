@@ -1,9 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CARGOS, UFS, cargosDe, type CargoId, type Turno } from '@/lib/config'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { CARGOS, CARGOS_MAPA, UFS, cargosDe, type CargoId, type Turno } from '@/lib/config'
 import type { Resultado } from '@/lib/tse'
+import type { ResultadoMapa } from '@/lib/mapa'
 import { CandidatoCard } from '@/components/CandidatoCard'
+import { MapaBrasil } from '@/components/MapaBrasil'
 import { NumeroAnimado } from '@/components/NumeroAnimado'
 
 const INTERVALO_MS = 15_000
@@ -13,8 +15,11 @@ const LIMITE_INICIAL = 30
 type Estado =
   | { tipo: 'carregando' }
   | { tipo: 'ok'; dados: Resultado }
+  | { tipo: 'mapa'; dados: ResultadoMapa }
   | { tipo: 'aguardando'; mensagem: string }
   | { tipo: 'erro'; mensagem: string }
+
+type Visao = 'lista' | 'mapa'
 
 const proporcional = (c: CargoId) => c === 6 || c === 7 || c === 8
 
@@ -24,9 +29,12 @@ function lerUrl() {
   const abr = (p.get('abr') ?? 'BR').toUpperCase()
   const abrValida = abr === 'BR' || UFS.some((u) => u.sigla === abr) ? abr : 'BR'
   const cargo = Number(p.get('cargo') ?? 1) as CargoId
+  const visao: Visao = p.get('visao') === 'mapa' ? 'mapa' : 'lista'
+  const permitidos = visao === 'mapa' ? CARGOS_MAPA : cargosDe(abrValida)
   return {
     abr: abrValida,
-    cargo: cargosDe(abrValida).includes(cargo) ? cargo : cargosDe(abrValida)[0],
+    visao,
+    cargo: permitidos.includes(cargo) ? cargo : permitidos[0],
     turno: (p.get('turno') === '2' ? 2 : 1) as Turno,
     simulacao: p.get('simulacao') === '1',
   }
@@ -37,6 +45,7 @@ export default function Pagina() {
   const [cargo, setCargo] = useState<CargoId>(1)
   const [turno, setTurno] = useState<Turno>(1)
   const [simulacao, setSimulacao] = useState(false)
+  const [visao, setVisao] = useState<Visao>('lista')
   const [pronto, setPronto] = useState(false)
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
   const [buscadoEm, setBuscadoEm] = useState<number | null>(null)
@@ -52,28 +61,34 @@ export default function Pagina() {
       setCargo(u.cargo)
       setTurno(u.turno)
       setSimulacao(u.simulacao)
+      setVisao(u.visao)
     }
     setPronto(true)
   }, [])
 
   useEffect(() => {
     if (!pronto) return
-    const p = new URLSearchParams({ abr, cargo: String(cargo) })
+    const p = new URLSearchParams(visao === 'mapa' ? { visao, cargo: String(cargo) } : { abr, cargo: String(cargo) })
     if (turno === 2) p.set('turno', '2')
     if (simulacao) p.set('simulacao', '1')
     window.history.replaceState(null, '', `?${p}`)
-  }, [abr, cargo, turno, simulacao, pronto])
+  }, [abr, cargo, turno, simulacao, visao, pronto])
+
+  // Só a resposta da busca mais recente vale (evita uma resposta antiga sobrescrever a nova)
+  const ultimaBusca = useRef(0)
 
   const buscar = useCallback(
     async (silencioso: boolean) => {
+      const id = ++ultimaBusca.current
       if (!silencioso) setEstado({ tipo: 'carregando' })
       const p = new URLSearchParams({ abr, cargo: String(cargo), turno: String(turno) })
       if (simulacao) p.set('simulacao', '1')
       try {
-        const res = await fetch(`/api/resultado?${p}`, { cache: 'no-store' })
+        const res = await fetch(visao === 'mapa' ? `/api/mapa?${p}` : `/api/resultado?${p}`, { cache: 'no-store' })
         const json = await res.json()
+        if (id !== ultimaBusca.current) return
         if (res.ok) {
-          setEstado({ tipo: 'ok', dados: json as Resultado })
+          setEstado(visao === 'mapa' ? { tipo: 'mapa', dados: json as ResultadoMapa } : { tipo: 'ok', dados: json as Resultado })
           setBuscadoEm(Date.now())
         } else if (json.naoDisponivel) {
           setEstado({ tipo: 'aguardando', mensagem: json.erro })
@@ -82,10 +97,10 @@ export default function Pagina() {
           setEstado({ tipo: 'erro', mensagem: json.erro ?? 'Erro ao buscar os dados.' })
         }
       } catch {
-        if (!silencioso) setEstado({ tipo: 'erro', mensagem: 'Sem conexão. Tentando de novo…' })
+        if (id === ultimaBusca.current && !silencioso) setEstado({ tipo: 'erro', mensagem: 'Sem conexão. Tentando de novo…' })
       }
     },
-    [abr, cargo, turno, simulacao],
+    [abr, cargo, turno, simulacao, visao],
   )
 
   // Busca inicial + atualização periódica (pausa quando a aba está escondida)
@@ -118,8 +133,24 @@ export default function Pagina() {
     else if (abr === 'BR' && nova !== 'BR') setCargo(3) // ao escolher um estado, começa por Governador
   }
 
+  function trocarVisao(nova: Visao) {
+    setVisao(nova)
+    if (nova === 'mapa' && !CARGOS_MAPA.includes(cargo)) setCargo(1)
+    if (nova === 'lista' && !cargosDe(abr).includes(cargo)) setCargo(cargosDe(abr)[0])
+  }
+
+  // Clique num estado do mapa: abre a lista daquele estado no mesmo cargo
+  function abrirEstado(uf: string) {
+    setAbr(uf)
+    setVisao('lista')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const dados = estado.tipo === 'ok' ? estado.dados : null
-  const aoVivo = !!dados && !dados.totalizacaoFinal && dados.urnas.percentual > 0
+  const mapa = estado.tipo === 'mapa' ? estado.dados : null
+  const aoVivo =
+    (!!dados && !dados.totalizacaoFinal && dados.urnas.percentual > 0) ||
+    (!!mapa && Object.values(mapa.estados).some((e) => e && e.urnasPct > 0 && !e.totalizacaoFinal))
 
   const lista = useMemo(() => {
     if (!dados) return []
@@ -168,23 +199,37 @@ export default function Pagina() {
 
       {/* Seletores */}
       <section className="mb-5 space-y-3 rounded-2xl border border-linha bg-painel p-3 sm:p-4">
-        <div className="flex flex-wrap gap-2">
-          <label className="flex-1 min-w-[180px]">
-            <span className="mb-1 block text-xs text-suave">Local</span>
-            <select
-              value={abr}
-              onChange={(e) => trocarAbr(e.target.value)}
-              className="w-full rounded-xl border border-linha bg-painel-2 px-3 py-2.5 text-sm font-medium outline-none focus:border-ouro/60"
+        <div className="grid grid-cols-2 rounded-xl bg-painel-2 p-1 text-sm">
+          {(['lista', 'mapa'] as Visao[]).map((v) => (
+            <button
+              key={v}
+              onClick={() => trocarVisao(v)}
+              className={`rounded-lg py-1.5 font-medium transition ${v === visao ? 'bg-ouro text-fundo' : 'text-suave hover:text-texto'}`}
             >
-              <option value="BR">🇧🇷 Brasil (Presidente)</option>
-              {UFS.map((u) => (
-                <option key={u.sigla} value={u.sigla}>
-                  {u.sigla} · {u.nome}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="w-[130px]">
+              {v === 'lista' ? '📋 Lista' : '🗺️ Mapa por estado'}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {visao === 'lista' && (
+            <label className="flex-1 min-w-[180px]">
+              <span className="mb-1 block text-xs text-suave">Local</span>
+              <select
+                value={abr}
+                onChange={(e) => trocarAbr(e.target.value)}
+                className="w-full rounded-xl border border-linha bg-painel-2 px-3 py-2.5 text-sm font-medium outline-none focus:border-ouro/60"
+              >
+                <option value="BR">🇧🇷 Brasil (Presidente)</option>
+                {UFS.map((u) => (
+                  <option key={u.sigla} value={u.sigla}>
+                    {u.sigla} · {u.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className={visao === 'mapa' ? 'flex-1' : 'w-[130px]'}>
             <span className="mb-1 block text-xs text-suave">Turno</span>
             <select
               value={turno}
@@ -198,7 +243,7 @@ export default function Pagina() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {cargosDe(abr).map((c) => (
+          {(visao === 'mapa' ? CARGOS_MAPA : cargosDe(abr)).map((c) => (
             <button
               key={c}
               onClick={() => setCargo(c)}
@@ -215,7 +260,8 @@ export default function Pagina() {
       {/* Título da disputa + resumo */}
       <section className="mb-4">
         <h2 className="text-lg font-semibold sm:text-xl">
-          {CARGOS[cargo].nome} <span className="text-suave">· {nomeLocal}</span>
+          {CARGOS[cargo].nome}{' '}
+          <span className="text-suave">· {visao === 'mapa' ? 'Brasil, quem lidera em cada estado' : nomeLocal}</span>
         </h2>
 
         {dados && (
@@ -269,6 +315,8 @@ export default function Pagina() {
           ))}
         </ul>
       )}
+
+      {mapa && <MapaBrasil dados={mapa} aoAbrirEstado={abrirEstado} />}
 
       {estado.tipo === 'aguardando' && (
         <div className="rounded-2xl border border-linha bg-painel p-6 text-center">
@@ -345,6 +393,7 @@ export default function Pagina() {
       </footer>
       <p className="mt-3 text-[11px] text-suave/70">
         Projeto pessoal, sem vínculo com a Justiça Eleitoral. Fonte: resultados.tse.jus.br.
+        Mapa: SVG Maps (CC BY 4.0).
       </p>
       <p className="mt-3 text-center text-xs text-suave">
         Feito por:{' '}

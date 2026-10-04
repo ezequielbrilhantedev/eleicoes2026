@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { Candidato } from '@/lib/tse'
+import { corPartido } from '@/lib/partidos'
 import { NumeroAnimado } from './NumeroAnimado'
-
-const CORES = ['#f5c542', '#4f8cff', '#ef5a6f', '#2fd38a', '#b07cff', '#ff9a3d', '#3fc9e0', '#e86bd0']
 
 function iniciais(nome: string) {
   return nome
@@ -57,8 +56,8 @@ export function CandidatoCard({
   aoVivo: boolean
   destaque: boolean
 }) {
-  // Cor fixa por candidato, para não trocar quando ele muda de posição
-  const cor = CORES[[...c.id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % CORES.length]
+  // Cor do partido, a mesma usada no mapa
+  const cor = corPartido(c.partido)
   const largura = escala > 0 ? Math.min(100, (c.percentual / escala) * 100) : 0
 
   // Pisca levemente quando os votos mudam

@@ -77,6 +77,13 @@ body {
   }
 }
 
+/* Estados do mapa mudam de cor suavemente quando o líder troca */
+.mapa-uf {
+  transition:
+    fill 0.8s ease,
+    opacity 0.2s ease;
+}
+
 select {
   background-image: none;
 }
@@ -86,7 +93,8 @@ select {
   .barra-viva::after,
   .ao-vivo,
   .flash-a,
-  .flash-b {
+  .flash-b,
+  .mapa-uf {
     transition: none;
     animation: none;
   }
