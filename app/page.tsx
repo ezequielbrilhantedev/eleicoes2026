@@ -287,14 +287,23 @@ export default function Pagina() {
               <div className="rounded-xl bg-painel-2 p-2">
                 <dt className="text-suave">Comparecimento</dt>
                 <dd className="font-semibold tabular-nums">{dados.eleitorado.pComparecimento.toLocaleString('pt-BR')}%</dd>
+                <dd className="mt-0.5 text-[11px] text-suave tabular-nums">
+                  <NumeroAnimado valor={dados.eleitorado.comparecimento} /> eleitores
+                </dd>
               </div>
               <div className="rounded-xl bg-painel-2 p-2">
                 <dt className="text-suave">Brancos</dt>
                 <dd className="font-semibold tabular-nums">{dados.votos.pBrancos.toLocaleString('pt-BR')}%</dd>
+                <dd className="mt-0.5 text-[11px] text-suave tabular-nums">
+                  <NumeroAnimado valor={dados.votos.brancos} /> votos
+                </dd>
               </div>
               <div className="rounded-xl bg-painel-2 p-2">
                 <dt className="text-suave">Nulos</dt>
                 <dd className="font-semibold tabular-nums">{dados.votos.pNulos.toLocaleString('pt-BR')}%</dd>
+                <dd className="mt-0.5 text-[11px] text-suave tabular-nums">
+                  <NumeroAnimado valor={dados.votos.nulos} /> votos
+                </dd>
               </div>
             </dl>
             {proporcional(dados.cargo) && (
