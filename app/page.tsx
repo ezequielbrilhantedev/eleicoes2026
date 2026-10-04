@@ -6,6 +6,7 @@ import type { Resultado } from '@/lib/tse'
 import type { ResultadoMapa } from '@/lib/mapa'
 import { CandidatoCard } from '@/components/CandidatoCard'
 import { MapaBrasil } from '@/components/MapaBrasil'
+import { ApoieProjeto } from '@/components/ApoieProjeto'
 import { NumeroAnimado } from '@/components/NumeroAnimado'
 
 const INTERVALO_MS = 15_000
@@ -415,6 +416,7 @@ export default function Pagina() {
           @ezequielbrilhante.dev
         </a>
       </p>
+      <ApoieProjeto />
     </main>
   )
 }
