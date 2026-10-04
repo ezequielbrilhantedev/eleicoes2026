@@ -346,6 +346,17 @@ export default function Pagina() {
       <p className="mt-3 text-[11px] text-suave/70">
         Projeto pessoal, sem vínculo com a Justiça Eleitoral. Fonte: resultados.tse.jus.br.
       </p>
+      <p className="mt-3 text-center text-xs text-suave">
+        Feito por:{' '}
+        <a
+          href="https://www.instagram.com/ezequielbrilhante.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-ouro hover:underline"
+        >
+          @ezequielbrilhante.dev
+        </a>
+      </p>
     </main>
   )
 }
