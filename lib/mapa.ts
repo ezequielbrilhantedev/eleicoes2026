@@ -7,6 +7,8 @@ export interface CandidatoMapa {
   numero: string
   votos: number
   percentual: number
+  eleito: boolean
+  segundoTurno: boolean
 }
 
 export interface EstadoMapa {
@@ -44,6 +46,8 @@ const resumirCandidato = (c: Resultado['candidatos'][number]): CandidatoMapa => 
   numero: c.numero,
   votos: c.votos,
   percentual: c.percentual,
+  eleito: c.eleito,
+  segundoTurno: !c.eleito && /2º turno/i.test(c.situacao),
 })
 
 export function resumirEstado(r: Resultado): EstadoMapa {

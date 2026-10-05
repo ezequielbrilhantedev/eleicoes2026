@@ -83,19 +83,20 @@ export function CandidatoCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate text-base font-semibold sm:text-lg">
-                {c.nome}
+              {/* A tag fica fora do trecho cortado com "…" e, se não couber ao lado do nome, desce para a linha de baixo */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <p className="max-w-full truncate text-base font-semibold sm:text-lg">{c.nome}</p>
                 {c.eleito && (
-                  <span className="ml-2 rounded-md bg-verde/15 px-1.5 py-0.5 align-middle text-xs font-bold text-verde">
+                  <span className="shrink-0 rounded-md bg-verde/15 px-1.5 py-0.5 text-xs font-bold text-verde">
                     ELEITO
                   </span>
                 )}
                 {!c.eleito && /2º turno/i.test(c.situacao) && (
-                  <span className="ml-2 rounded-md bg-ouro/15 px-1.5 py-0.5 align-middle text-xs font-bold text-ouro">
+                  <span className="shrink-0 rounded-md bg-ouro/15 px-1.5 py-0.5 text-xs font-bold text-ouro">
                     2º TURNO
                   </span>
                 )}
-              </p>
+              </div>
               <p className="truncate text-xs text-suave sm:text-sm">
                 <span className="font-semibold text-texto/90">{c.partido}</span> · {c.numero}
                 {c.vice && <span className="hidden sm:inline"> · Vice/1º sup.: {c.vice}</span>}

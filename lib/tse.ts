@@ -117,7 +117,9 @@ export function normalizar(raw: RawResultado, cargo: CargoId, turno: Turno): Res
           coligacao,
           votos: num(cand.vap),
           percentual: pct(cand.pvap),
-          eleito: cand.e === 's',
+          // O campo "e" do TSE vale "s" também para quem vai ao 2º turno; só a situação
+          // ("Eleito", "Eleito por QP", "Eleito por média") confirma a eleição.
+          eleito: /^eleito/i.test(cand.st ?? ''),
           situacao: cand.st ?? '',
           vice: vice ? `${vice.nmu} (${vice.sgp})` : '',
           foto: fotoUrl(cargo, abr, cand.sqcand, turno),

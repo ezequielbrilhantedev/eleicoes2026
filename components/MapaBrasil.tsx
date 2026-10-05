@@ -212,13 +212,25 @@ function Amostra({ cor }: { cor: string }) {
   return <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: cor }} />
 }
 
-function LinhaCandidato({ c, suave }: { c: { nome: string; partido: string; percentual: number }; suave?: boolean }) {
+function LinhaCandidato({
+  c,
+  suave,
+}: {
+  c: { nome: string; partido: string; percentual: number; eleito: boolean; segundoTurno: boolean }
+  suave?: boolean
+}) {
   return (
     <p className={`mt-1 flex items-center gap-2 ${suave ? 'text-suave' : ''}`}>
       <Amostra cor={corPartido(c.partido)} />
       <span className="truncate">
         <span className={suave ? '' : 'font-semibold'}>{c.nome}</span> ({c.partido})
       </span>
+      {c.eleito && (
+        <span className="shrink-0 rounded-md bg-verde/15 px-1.5 py-0.5 text-[10px] font-bold text-verde">ELEITO</span>
+      )}
+      {c.segundoTurno && (
+        <span className="shrink-0 rounded-md bg-ouro/15 px-1.5 py-0.5 text-[10px] font-bold text-ouro">2º TURNO</span>
+      )}
       <span className="ml-auto tabular-nums">{fmtPct(c.percentual)}%</span>
     </p>
   )
