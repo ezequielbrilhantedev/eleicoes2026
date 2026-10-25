@@ -19,13 +19,17 @@ export function ApoieProjeto() {
   }
 
   return (
-    <div className="mt-3 text-center text-xs text-suave">
+    <div className="mt-4 text-center text-xs text-suave">
       <button
         onClick={() => setAberto((a) => !a)}
         aria-expanded={aberto}
-        className="rounded-full px-3 py-1 hover:text-texto hover:underline"
+        className="inline-flex items-center gap-2 rounded-full bg-ouro px-5 py-2.5 text-sm font-semibold text-fundo shadow-md transition hover:brightness-110 active:scale-95"
       >
-        ☕ Gostou? Apoie o projeto
+        <span aria-hidden="true">☕</span>
+        Gostou? Apoie o projeto com um Pix
+        <span aria-hidden="true" className={`transition-transform ${aberto ? 'rotate-180' : ''}`}>
+          ▾
+        </span>
       </button>
 
       {aberto && (
