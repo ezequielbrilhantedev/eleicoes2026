@@ -8,6 +8,7 @@ import { CandidatoCard } from '@/components/CandidatoCard'
 import { MapaBrasil } from '@/components/MapaBrasil'
 import { ApoieProjeto } from '@/components/ApoieProjeto'
 import { NumeroAnimado } from '@/components/NumeroAnimado'
+import { DiferencaVotos } from '@/components/DiferencaVotos'
 
 const INTERVALO_MS = 15_000
 const INTERVALO_SIMULACAO_MS = 5_000
@@ -23,6 +24,14 @@ type Estado =
 type Visao = 'lista' | 'mapa'
 
 const proporcional = (c: CargoId) => c === 6 || c === 7 || c === 8
+
+/** Cargos majoritários: o líder mostra a vantagem sobre o 2º; os demais, quanto faltam para o líder. */
+function diferencaDe(dados: Resultado, c: Resultado['candidatos'][number]) {
+  if (proporcional(dados.cargo)) return undefined
+  const i = dados.candidatos.indexOf(c)
+  if (i === 0) return { frente: true, votos: c.votos - (dados.candidatos[1]?.votos ?? c.votos) }
+  return { frente: false, votos: dados.candidatos[0].votos - c.votos }
+}
 
 function lerUrl() {
   if (typeof window === 'undefined') return null
@@ -307,6 +316,14 @@ export default function Pagina() {
                 </dd>
               </div>
             </dl>
+            {!proporcional(dados.cargo) && (
+              <DiferencaVotos
+                key={`${dados.cargo}-${dados.abrangencia}-${turno}-${simulacao}`}
+                candidatos={dados.candidatos}
+                vagas={dados.vagas}
+                aoVivo={aoVivo || !!dados.simulacao}
+              />
+            )}
             {proporcional(dados.cargo) && (
               <p className="mt-3 text-xs text-suave">
                 {dados.vagas > 1 && `${dados.vagas} vagas. `}A eleição para deputado é proporcional (quociente eleitoral), então a ordem de
@@ -370,6 +387,7 @@ export default function Pagina() {
                 escala={escala}
                 aoVivo={aoVivo || !!dados.simulacao}
                 destaque={dados.candidatos.indexOf(c) === 0 && c.votos > 0}
+                diferenca={diferencaDe(dados, c)}
               />
             ))}
           </ul>
