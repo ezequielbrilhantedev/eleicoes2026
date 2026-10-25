@@ -48,6 +48,7 @@ export function CandidatoCard({
   escala,
   aoVivo,
   destaque,
+  diferenca,
 }: {
   c: Candidato
   posicao: number
@@ -55,6 +56,8 @@ export function CandidatoCard({
   escala: number
   aoVivo: boolean
   destaque: boolean
+  /** votos de diferença: à frente do seguinte (líder) ou atrás do líder (demais); só em cargos majoritários */
+  diferenca?: { frente: boolean; votos: number }
 }) {
   // Cor do partido, a mesma usada no mapa
   const cor = corPartido(c.partido)
@@ -110,6 +113,12 @@ export function CandidatoCard({
               <p className="mt-1 text-xs text-suave tabular-nums">
                 <NumeroAnimado valor={c.votos} /> votos
               </p>
+              {diferenca && diferenca.votos > 0 && (
+                <p className={`mt-0.5 whitespace-nowrap text-xs font-semibold tabular-nums ${diferenca.frente ? 'text-verde' : 'text-red-400'}`}>
+                  {diferenca.frente ? '+' : '−'}
+                  <NumeroAnimado valor={diferenca.votos} /> {diferenca.frente ? 'à frente' : 'do líder'}
+                </p>
+              )}
             </div>
           </div>
 
