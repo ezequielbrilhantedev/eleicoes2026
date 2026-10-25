@@ -26,7 +26,7 @@ export function ApoieProjeto() {
         className="inline-flex items-center gap-2 rounded-full bg-ouro px-5 py-2.5 text-sm font-semibold text-fundo shadow-md transition hover:brightness-110 active:scale-95"
       >
         <span aria-hidden="true">☕</span>
-        Gostou? Apoie o projeto com um Pix
+        Gostou? Apoie o projeto
         <span aria-hidden="true" className={`transition-transform ${aberto ? 'rotate-180' : ''}`}>
           ▾
         </span>
